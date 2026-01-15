@@ -2,802 +2,1548 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CMG Happy Spring Festival</title>
     <style>
-        :root {
-            --harmony-scale: 1;
-            --scroll-position: 0px;
+        /* 所有现有CSS完全保持不变 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
         
         body {
-            font-family: -apple-system, "HarmonyOS Sans", BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #222;
-            color: white;
+            overflow-x: hidden;
+        }
+        
+        html {
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+        
+        body {
             display: flex;
             flex-direction: column;
-            height: 100vh;
-            touch-action: none;
-            -webkit-overflow-scrolling: touch;
+            justify-content: flex-start;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            font-family: 'Arial Black', 'Arial', sans-serif;
+            overflow: auto;
+            padding: 20px;
             position: relative;
-            overflow-y: auto;
-            min-height: auto;
+            padding-top: 0;
         }
         
-        .header {
-            background-color: #333;
-            padding: 1px;
-            text-align: center;
-            flex-shrink: 0;
-            height: 20px;
-            overflow: hidden;
-        }
-        
-        .header h1 {
-            font-size: 16px;
-            margin: 0;
-            line-height: 28px;
-        }
-        
-        .controls {
-            display: flex;
-            justify-content: center;
-            padding: 2px;
-            background-color: #444;
-            gap: 3px;
-            flex-wrap: wrap;
-            flex-shrink: 0;
-            height: auto;
-            min-height: 20px;
-        }
-        
-        button {
-            padding: 3px 6px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 16px;
-            min-width: 10px;
-            -webkit-tap-highlight-color: transparent;
-        }
-        
-        button:hover {
-            background-color: #45a049;
-        }
-        
-        button:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-        }
-        
-        .control-group {
+        .media-player {
+            position: fixed;
+            top: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 580px;
+            height: 50px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
-            gap: 3px;
-            background-color: #555;
-            padding: 3px 3px;
-            border-radius: 6px;
+            justify-content: space-between;
+            padding: 0 15px;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
         }
         
-        /* === 修改开始：teleprompter容器高度设为500px === */
-        .teleprompter {
+        .control-btn {
+            background: linear-gradient(135deg, #ffd700, #daa520);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #000;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+        
+        .control-btn:hover {
+            transform: scale(1.1);
+            background: linear-gradient(135deg, #ffec8b, #ffd700);
+        }
+        
+        .control-btn.active {
+            background: linear-gradient(135deg, #ff4500, #ff6347);
+            color: white;
+        }
+        
+        .progress-container {
+            flex: 1;
+            margin: 0 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .time-display {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            color: #ffd700;
+            font-size: 12px;
+            margin-bottom: 5px;
+            font-family: monospace;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 215, 0, 0.3);
+            border-radius: 3px;
+            cursor: pointer;
+            position: relative;
             overflow: hidden;
-            position: relative; /* 新增：建立定位上下文用于子元素绝对定位 */
-            background-color: black;
-            margin: 5px;
-            border-radius: 8px;
+        }
+        
+        .progress {
+            height: 100%;
+            background: linear-gradient(90deg, #ffd700, #ff4500);
+            border-radius: 3px;
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+        
+        .progress-bar:hover .progress {
+            background: linear-gradient(90deg, #ffec8b, #ff6347);
+        }
+        
+        .hidden-media {
+            display: none;
+            position: absolute;
+            top: -9999px;
+            left: -9999px;
+        }
+        
+        @media (max-width: 768px) {
+            .media-player {
+                width: 90%;
+                max-width: 580px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .media-player {
+                width: 95%;
+                height: 45px;
+                padding: 0 10px;
+            }
+            
+            .control-btn {
+                width: 35px;
+                height: 35px;
+                font-size: 16px;
+            }
+            
+            .time-display {
+                font-size: 10px;
+            }
+        }
+        
+        .container {
+            perspective: 1000px;
+            text-align: center;
+            margin-bottom: 0px;
+        }
+        
+        .year-3d {
+            display: inline-block;
+            font-size: 180px;
+            font-weight: 900;
+            color: #ffd700;
+            text-shadow: 
+                5px 5px 0 rgba(0, 0, 0, 0.3),
+                10px 10px 20px rgba(0, 0, 0, 0.5);
+            transform-style: preserve-3d;
+            animation: float 6s ease-in-out infinite;
+            letter-spacing: 15px;
+        }
+        
+        .year-3d span {
+            display: inline-block;
+            position: relative;
+            text-transform: uppercase;
+            transform-style: preserve-3d;
+        }
+        
+        .year-3d span::before,
+        .year-3d span::after {
+            content: attr(data-digit);
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform-origin: 0 0;
+        }
+        
+        .year-3d span::before {
+            color: rgba(255, 215, 0, 0.5);
+            transform: translateZ(-30px);
+            z-index: -1;
+        }
+        
+        .year-3d span::after {
+            color: rgba(255, 140, 0, 0.7);
+            transform: translateZ(-15px);
+            z-index: -2;
+        }
+        
+        .neon-border {
+            position: relative;
+            padding: 20px;
+            border-radius: 20px;
+        }
+        
+        .metal-effect {
+            background: linear-gradient(
+                135deg,
+                #ffd700 0%,
+                #ffec8b 25%,
+                #ffd700 50%,
+                #daa520 75%,
+                #b8860b 100%
+            );
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            background-size: 200% auto;
+            animation: shine 3s linear infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% {
+                transform: rotateX(15deg) rotateY(0deg) translateY(0);
+            }
+            50% {
+                transform: rotateX(15deg) rotateY(10deg) translateY(-20px);
+            }
+        }
+        
+        @keyframes shine {
+            to {
+                background-position: 200% center;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .year-3d {
+                font-size: 120px;
+                letter-spacing: 3px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .year-3d {
+                font-size: 80px;
+                letter-spacing: 0px;
+            }
+        }
+        
+        .glow {
+            animation: pulse 4s ease-in-out infinite;
+            z-index: -1;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 0.3;
+            }
+            50% {
+                opacity: 0.7;
+            }
+        }
+        
+        .logo {
+            text-align: center;
+            margin-top: -24px;
+            width: 100%;
             display: flex;
             justify-content: center;
-            align-items: flex-start;
-            touch-action: none;
-            
-            /* 修改：设置固定高度500px，取消flex伸缩 */
-            height: 500px; /* 固定高度500px */
-            flex: none; /* 取消flex伸缩 */
-            width: calc(100% - 10px); /* 保持左右边距 */
-            min-height: auto; /* 移除最小高度限制 */
+            align-items: center;
         }
         
-        /* === 新增：背景容器（底层）=== */
+        .logo img {
+            max-width: 580px;
+            width: 100%;
+            height: auto;
+            border-radius: 0px;
+            transition: transform 0.3s ease;
+        }
+        
+        .logo img:hover {
+            transform: scale(1.02);
+        }
+        
+        @media (max-width: 768px) {
+            .logo img {
+                max-width: 450px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .logo img {
+                max-width: 380px;
+            }
+        }
+        
+        .background {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: -1;
+            width: 100%;
+            text-align: center;
+            pointer-events: none;
+        }
+        
+        .background img {
+            max-width: 680px;
+            width: 90%;
+            height: auto;
+            opacity: 1;
+            filter: none;
+        }
+        
+        .background {
+            top: 380px;
+        }
+        
+        @media (max-width: 768px) {
+            .background {margin-top: auto;}
+            .background img {
+                max-width: 450px;
+                opacity: 1;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .background {top: 160px;}
+            .logo {
+                margin-top: -90px;
+            }
+            .background img {
+                max-width: 350px;
+                opacity: 1;
+            }
+        }
+        
+        .main-subtitle {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 100px;
+        }
+        
+        .subtitle {
+            color: red;
+            font-size: 50px;
+            opacity: 0.88;
+            position: relative;
+            transform-origin: center top;
+            z-index: 1;
+            animation: 
+                subtitleEnter 2s ease-out 1.5s both,
+                subtitleLoop 5s ease-in-out 3.5s infinite;
+        }
+        
+        @keyframes subtitleEnter {
+            0% {
+                transform: translateY(100px) scale(1);
+                opacity: 0;
+            }
+            100% {
+                transform: translateY(0) scale(1);
+                opacity: 0.88;
+            }
+        }
+        
+        @keyframes subtitleLoop {
+            0% {
+                transform: scale(1);
+                opacity: 0.88;
+            }
+            60% {
+                transform: scale(3);
+                opacity: 0.88;
+            }
+            60%, 79.999% {
+                transform: scale(3.2);
+                opacity: 0;
+            }
+            80% {
+                transform: scale(1);
+                opacity: 0;
+            }
+            90% {
+                transform: scale(1);
+                opacity: 0.44;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 0.88;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .subtitle {
+                top: -70px;
+                font-size: 29px;
+            }
+        }
+        
+        .main-content {
+            position: absolute;
+            top: -2vh;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 1;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                top: 30vh;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .main-content {
+                top: 2vh;
+            }
+        }
+        
+        .image-window {
+            margin-top: -80px;
+            width: 100vw;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow: hidden;
+            background: transparent;
+            gap: 0;
+            position: relative;
+            z-index: -2;
+            height: 500px;
+            contain: strict;
+            isolation: isolate;
+        }
+        
+        .image-window .original-img {
+            width: 100%;
+            height: auto;
+            display: block;
+            object-fit: contain;
+            opacity: 0;
+            position: absolute;
+            z-index: -1;
+        }
+        
+        /* ===== 新增：background-container 样式 ===== */
         .background-container {
-            position: absolute; /* 绝对定位，覆盖整个父容器 */
+            position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 1; /* 底层，在content-container下面 */
-            background-color: black; /* 默认黑色背景 */
-            overflow: hidden; /* 隐藏超出部分 */
-        }
-        
-        /* === 修改：内容容器（上层）=== */
-        .content-container {
-            position: relative; /* 相对定位，建立新的层叠上下文 */
-            z-index: 2; /* 上层，覆盖背景容器 */
-            width: 100%;
-            height: 96%;
+            z-index: -1; /* 在 teleprompter-wrapper 下面 */
             overflow: hidden;
-            /* 注意：由于teleprompter现在是500px，content-container高度为500px的96% = 约480px */
         }
         
-        /* 图片容器样式 */
-        #image-container {
+        /* 背景图片的基本样式 */
+        .background-container img {
+            display: block;
             position: absolute;
-            width: 100%;
-            text-align: center;
-            transition: transform 0.1s linear;
-            user-select: none;
-            box-sizing: border-box;
-            will-change: transform;
-            margin: 0;
-            top: 0;
-            left: 0;
-            transform: translateY(var(--scroll-position, 0px));
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0px;
-            padding: 0px 0;
         }
         
-        .image-item {
-            max-width: 100%;
+        .teleprompter-wrapper {
+            position: relative;
+            width: 430px;
+            height: 500px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+            background: #000;
+            cursor: pointer;
+            margin: 0 auto;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            -webkit-overflow-scrolling: touch;
+            contain: strict;
+            will-change: transform;
+            transform: translateZ(0);
+            z-index: 1; /* 确保在 background-container 上面 */
+        }
+        
+        .teleprompter-wrapper.loaded {
+            opacity: 1;
+        }
+        
+        .teleprompter-inner {
+            position: relative;
+            width: 100%;
+        }
+        
+        .teleprompter-inner img {
+            width: 100%;
             height: auto;
             display: block;
-            margin: 0 auto;
-            border-radius: 4px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            pointer-events: none;
+            user-select: none;
+            contain: content;
+            backface-visibility: hidden;
         }
         
-        /* iOS使用top定位 */
-        .use-top-positioning {
-            transform: none !important;
-            top: var(--content-position, 0px) !important;
+        /* 添加底部占位元素样式 */
+        .bottom-spacer {
+            background: transparent;
+            pointer-events: none;
+            flex-shrink: 0;
         }
         
-        .content-container.mirror #image-container.use-top-positioning {
-            transform: scaleX(-1) !important;
-            top: var(--content-position, 0px) !important;
+        @media (max-width: 768px) {
+            .image-window {
+                max-width: 100vw;
+                margin-left: calc(-50vw + 50%);
+            }
         }
         
-        #file-input {
-            display: none;
+        @media (max-width: 480px) {
+            .image-window {
+                margin-top: -60px;
+                width: 100vw;
+                margin-left: calc(-50vw + 50%);
+                height: 500px;
+            }
+            
+            .teleprompter-wrapper {
+                width: 90vw;
+                max-width: 430px;
+                height: 500px;
+            }
+            
+            .background-container {
+                width: 100%;
+                height: 100%;
+            }
         }
         
-        /* 状态提示 */
-        .status-info {
-            font-size: 14px;
-            color: #4CAF50;
-            padding: 2px 5px;
+        @media (min-width: 769px) {
+            .image-window img {
+                max-width: 580px;
+            }
+            
+            .teleprompter-wrapper {
+                max-width: 430px;
+            }
         }
         
-        /* 图片计数器 - 固定在body底部居中 */
-        .image-counter {
-            position: fixed;
-            bottom: 10px;
+        /* ===== 新增：Teleprompter控制按钮样式 ===== */
+        .teleprompter-controls {
+            position: absolute;
+            bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            gap: 15px;
+            z-index: 20;
+            pointer-events: auto;
+        }
+        
+        .teleprompter-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.9), rgba(218, 165, 32, 0.9));
+            border: 2px solid #ffd700;
+            color: #000;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 
+                0 4px 15px rgba(0, 0, 0, 0.5),
+                0 0 10px rgba(255, 215, 0, 0.5);
+            backdrop-filter: blur(5px);
+            pointer-events: auto;
+        }
+        
+        .teleprompter-btn:hover {
+            transform: scale(1.1);
+            background: linear-gradient(135deg, rgba(255, 236, 139, 0.95), rgba(255, 215, 0, 0.95));
+            box-shadow: 
+                0 6px 20px rgba(0, 0, 0, 0.6),
+                0 0 15px rgba(255, 215, 0, 0.8);
+        }
+        
+        .teleprompter-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .teleprompter-btn.active {
+            background: linear-gradient(135deg, rgba(255, 69, 0, 0.9), rgba(255, 99, 71, 0.9));
             color: white;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 14px;
-            z-index: 1000;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-            text-align: center;
-            min-width: 120px;
+            border-color: #ff4500;
         }
         
-        .counter-number {
-            font-weight: bold;
-            color: #4CAF50;
+        /* 适配响应式设计 */
+        @media (max-width: 768px) {
+            .teleprompter-controls {
+                bottom: 15px;
+                gap: 12px;
+            }
+            
+            .teleprompter-btn {
+                width: 45px;
+                height: 45px;
+                font-size: 18px;
+            }
         }
         
-        @media screen and (max-width: 360px) {
-            button {
-                padding: 8px 12px;
-                min-width: 50px;
+        @media (max-width: 480px) {
+            .teleprompter-controls {
+                bottom: 10px;
+                gap: 10px;
+            }
+            
+            .teleprompter-btn {
+                width: 40px;
+                height: 40px;
                 font-size: 16px;
             }
-            
-            .image-counter {
-                font-size: 12px;
-                padding: 4px 10px;
-                min-width: 100px;
-                bottom: 5px;
-            }
         }
-
-        /* === 修改：横屏模式下也使用500px固定高度 === */
-        @media screen and (orientation: landscape) {
-            .header {
-                display: none;
-            }
-            
-            .teleprompter {
-                margin: 2px;
-                /* 修改：横屏也使用500px固定高度 */
-                height: 500px; /* 横屏保持500px高度 */
-                width: 90%;
-                margin-left: auto;
-                margin-right: auto;
-            }
-            
-            .content-container {
-                width: 100%;
-                height: 98% !important;
-            }
-            
-            .controls {
-                padding: 4px;
-                gap: 4px;
-            }
-            
-            .control-group {
-                padding: 4px 5px;
-            }
-            
-            button {
-                padding: 8px 5px;
-                min-width: 30px;
-            }
-            
-            .image-counter {
-                bottom: 5px;
-            }
+        
+        /* 确保按钮不会干扰teleprompter-wrapper的点击事件 */
+        .teleprompter-wrapper {
+            pointer-events: auto;
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>CMG Happy Spring Festival</h1>
-    </div>
-    
-    <div class="controls">
-        <div class="control-group">
-            <button id="start-btn">开始</button>
-            <button id="pause-btn" disabled>暂停</button>
-            <button id="reset-btn">重置</button>
+    <!-- 媒体播放器控制栏 -->
+    <div class="media-player">
+        <button class="control-btn" id="playPauseBtn">▶</button>
+        
+        <div class="progress-container">
+            <div class="time-display">
+                <span id="currentTime">0:00</span>
+                <span id="duration">0:00</span>
+            </div>
+            <div class="progress-bar" id="progressBar">
+                <div class="progress" id="progress"></div>
+            </div>
         </div>
         
-        <div class="control-group">
-            <label for="speed">速度:</label>
-            <input type="range" id="speed" min="1" max="20" value="5">
-            <span id="speed-value">5</span>
-        </div>
-        
-        <div class="control-group">
-            <button id="open-file-btn">导入图片</button>
-            <input type="file" id="file-input" accept="image/*" multiple>
-        </div>
-        
-        <div class="control-group status-info" id="status-info">
-            准备就绪
-        </div>
+        <button class="control-btn" id="loopBtn">🔁</button>
     </div>
     
-    <div class="teleprompter" id="teleprompter-area">
-        <!-- === 新增：背景容器（底层）=== -->
-        <div class="background-container" id="background-container"></div>
+    <!-- 隐藏的媒体元素 -->
+    <div class="hidden-media">
+        <audio id="mediaPlayer" controls>
+            <source src="congratulationprosperous.mp4" type="audio/mpeg">
+            <source src="media/audio.ogg" type="audio/ogg">
+            您的浏览器不支持音频播放
+        </audio>
+    </div>
+
+    <!-- 主内容包装器 -->
+    <div class="main-content">
+        <!-- Background容器 -->
+        <div class="background">
+            <img src="background001.png" alt="背景图案">
+        </div>
         
-        <!-- === 原有：内容容器（上层）=== -->
-        <div class="content-container" id="content-container">
-            <div id="image-container"></div>
+        <!-- Container容器 -->
+        <div class="container">
+            <div class="neon-border">
+                <div class="glow"></div>
+                <div class="year-3d">
+                    <span class="metal-effect" data-digit="2">2</span>
+                    <span class="metal-effect" data-digit="0">0</span>
+                    <span class="metal-effect" data-digit="2">2</span>
+                    <span class="metal-effect" data-digit="6">6</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Subtitle容器 -->
+        <div class="main-subtitle">
+            <div class="subtitle">Happy Spring Festival</div>
+        </div>
+
+        <!-- Logo容器 -->
+        <div class="logo">
+            <img src="MyCardEnglish.png" alt="CMG Logo">
+        </div>
+        
+        <!-- 图片窗口容器 -->
+        <div class="image-window">
+            <!-- 新增：背景容器 -->
+            <div class="background-container" id="backgroundContainer">
+                <!-- 背景图片将通过代码行动态添加 -->
+            </div>
+            
+            <!-- 原始图片（仅用于加载动画） -->
+            <img src="Socialmap003.jpg" alt="展示图片1" class="original-img">
+            
+            <!-- ===== 新增：Teleprompter控制按钮容器 ===== -->
+            <div class="teleprompter-controls" id="teleprompterControls">
+                <button class="teleprompter-btn" id="scrollToggleBtn" title="播放/暂停滚动">
+                    ▶
+                </button>
+                <button class="teleprompter-btn" id="importImageBtn" title="导入新图片">
+                    📤
+                </button>
+            </div>
+            
+            <!-- Teleprompter滚动容器 -->
+            <div class="teleprompter-wrapper loading">
+                <!-- 内部容器包含单张图片 -->
+                <div class="teleprompter-inner">
+                    <img src="Socialmap003.jpg" alt="展示图片" class="teleprompter-img" id="mainImage">
+                    <!-- 底部占位元素将由JavaScript动态添加 -->
+                </div>
+                
+                <!-- 隐藏的文件输入 -->
+                <input type="file" 
+                       id="imageUploadInput" 
+                       accept="image/*" 
+                       style="display: none;">
+                
+                <!-- 进度条容器（无样式） -->
+                <div class="teleprompter-progress"></div>
+            </div>
         </div>
     </div>
-    
-    <!-- 图片计数器 -->
-    <div class="image-counter" id="image-counter">
-        图片数量: <span class="counter-number" id="image-count">0</span> / 50
-    </div>
-    
+
     <script>
-        // 系统检测
-        const systemInfo = {
-            isIOS: /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream,
-            isAndroid: /Android/.test(navigator.userAgent),
-            isHarmonyOS: /HarmonyOS|HMOS/.test(navigator.userAgent)
-        };
+        // ===== 媒体播放器功能（完全不变） =====
+        const mediaPlayer = document.getElementById('mediaPlayer');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const loopBtn = document.getElementById('loopBtn');
+        const progressBar = document.getElementById('progressBar');
+        const progress = document.getElementById('progress');
+        const currentTimeEl = document.getElementById('currentTime');
+        const durationEl = document.getElementById('duration');
         
-        // 根据系统选择最佳滚动方案
-        const useTopPositioning = systemInfo.isIOS;
-        
-        // 应用系统特定优化
-        if (systemInfo.isHarmonyOS) {
-            document.documentElement.style.setProperty('--harmony-scale', '1.1');
-        }
-        
-        if (systemInfo.isIOS) {
-            document.body.style.webkitUserSelect = 'none';
-            document.body.style.webkitTouchCallout = 'none';
-            document.getElementById('image-container').classList.add('use-top-positioning');
-        }
-        
-        // 获取DOM元素
-        const startBtn = document.getElementById('start-btn');
-        const pauseBtn = document.getElementById('pause-btn');
-        const resetBtn = document.getElementById('reset-btn');
-        const openFileBtn = document.getElementById('open-file-btn');
-        const fileInput = document.getElementById('file-input');
-        const speedSlider = document.getElementById('speed');
-        const speedValue = document.getElementById('speed-value');
-        const imageContainer = document.getElementById('image-container');
-        const contentContainer = document.getElementById('content-container');
-        const teleprompterArea = document.getElementById('teleprompter-area');
-        const statusInfo = document.getElementById('status-info');
-        const imageCounter = document.getElementById('image-counter');
-        const imageCount = document.getElementById('image-count');
-        // === 新增：获取背景容器 ===
-        const backgroundContainer = document.getElementById('background-container');
-        
-        // 初始化变量
         let isPlaying = false;
-        let animationId;
-        let position = 0;
-        let speed = 5;
-        let touchStartY = 0;
-        let touchStartPosition = 0;
-        let isTouchMoving = false;
-        let containerHeight = 0;
-        let totalContentHeight = 0;
-        let images = []; // 存储图片元素和信息
-        const MAX_IMAGES = 50; // 最大图片数量
-        const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB限制
+        let isLooping = false;
         
-        // === 新增：背景图片设置函数 ===
-        /**
-         * 设置背景图片（后台调用）
-         * @param {string} url - 图片URL
-         * @param {number} positionX - X轴偏移像素值
-         * @param {number} positionY - Y轴偏移像素值
-         */
-        function setBackgroundImage(url, positionX = 0, positionY = 0) {
-            // 创建背景图片元素
-            const bgImg = document.createElement('img');
-            bgImg.src = url;
-            bgImg.alt = '背景图片';
-            bgImg.style.width = '100%';
-            bgImg.style.height = '100%';
-            bgImg.style.objectFit = 'cover'; // 拉伸填充整个容器
-            bgImg.style.objectPosition = `${positionX}px ${positionY}px`; // 使用像素值定位
-            
-            // 清空容器并添加新背景
-            backgroundContainer.innerHTML = '';
-            backgroundContainer.appendChild(bgImg);
-            
-            console.log(`背景图片已设置: ${url}, 位置: ${positionX}px ${positionY}px`);
-            updateStatus('背景图片已设置');
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
         }
         
-        // === 新增：清除背景图片函数 ===
-        /**
-         * 清除背景图片，恢复黑色背景
-         */
-        function clearBackgroundImage() {
-            backgroundContainer.innerHTML = '';
-            backgroundContainer.style.backgroundColor = 'black';
-            console.log('背景图片已清除，恢复黑色背景');
-            updateStatus('背景已恢复黑色');
+        function updateProgress() {
+            if (!mediaPlayer.duration) return;
+            
+            const percent = (mediaPlayer.currentTime / mediaPlayer.duration) * 100;
+            progress.style.width = `${percent}%`;
+            
+            currentTimeEl.textContent = formatTime(mediaPlayer.currentTime);
+            durationEl.textContent = formatTime(mediaPlayer.duration);
         }
         
-        // 更新图片计数器
-        function updateImageCounter() {
-            const count = images.length;
-            imageCount.textContent = count;
+        function setProgress(e) {
+            const width = progressBar.clientWidth;
+            const clickX = e.offsetX;
+            const duration = mediaPlayer.duration;
             
-            // 如果接近上限，改变颜色提示
-            if (count >= MAX_IMAGES - 5) {
-                imageCount.style.color = '#ff9800'; // 橙色警告
-            } else if (count >= MAX_IMAGES) {
-                imageCount.style.color = '#f44336'; // 红色警告
+            mediaPlayer.currentTime = (clickX / width) * duration;
+        }
+        
+        function togglePlayPause() {
+            if (isPlaying) {
+                mediaPlayer.pause();
+                playPauseBtn.textContent = '▶';
             } else {
-                imageCount.style.color = '#4CAF50'; // 绿色正常
+                mediaPlayer.play().catch(e => {
+                    console.log('播放被阻止:', e);
+                });
+                playPauseBtn.textContent = '⏸';
+            }
+            isPlaying = !isPlaying;
+        }
+        
+        function toggleLoop() {
+            isLooping = !isLooping;
+            mediaPlayer.loop = isLooping;
+            loopBtn.classList.toggle('active', isLooping);
+        }
+        
+        mediaPlayer.addEventListener('timeupdate', updateProgress);
+        mediaPlayer.addEventListener('loadedmetadata', () => {
+            durationEl.textContent = formatTime(mediaPlayer.duration);
+            updateProgress();
+        });
+        mediaPlayer.addEventListener('ended', () => {
+            if (!isLooping) {
+                isPlaying = false;
+                playPauseBtn.textContent = '▶';
+            }
+        });
+        
+        playPauseBtn.addEventListener('click', togglePlayPause);
+        loopBtn.addEventListener('click', toggleLoop);
+        progressBar.addEventListener('click', setProgress);
+        
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                togglePlayPause();
+            }
+        });
+        
+        // ===== 新增：背景图片管理函数 =====
+        // 通过代码行调用这些函数来设置背景图片
+        
+        /**
+         * 设置背景图片
+         * @param {string} imageUrl - 背景图片URL
+         * @param {Object} styles - 样式对象（可选）
+         * @param {string} styles.width - 宽度（如 '100%', '500px'）
+         * @param {string} styles.height - 高度（如 '100%', '300px'）
+         * @param {string} styles.objectFit - 填充方式（如 'cover', 'contain', 'fill'）
+         * @param {string} styles.objectPosition - 位置（如 'center', 'top left'）
+         * @param {string} styles.opacity - 透明度（如 '0.5', '1'）
+         * @param {string} styles.filter - 滤镜效果（如 'blur(5px)', 'brightness(0.8)'）
+         * @param {string} styles.transform - 变换（如 'scale(1.2)', 'rotate(10deg)'）
+         */
+        function setBackgroundImage(imageUrl, styles = {}) {
+            const bgContainer = document.getElementById('backgroundContainer');
+            if (!bgContainer) {
+                console.error('找不到background-container元素');
+                return;
+            }
+            
+            // 创建图片元素
+            const bgImg = document.createElement('img');
+            bgImg.src = imageUrl;
+            bgImg.alt = '背景图片';
+            
+            // 应用样式
+            Object.keys(styles).forEach(styleKey => {
+                if (styles[styleKey] !== undefined) {
+                    bgImg.style[styleKey] = styles[styleKey];
+                }
+            });
+            
+            // 清空容器并添加新图片
+            bgContainer.innerHTML = '';
+            bgContainer.appendChild(bgImg);
+            
+            console.log('✅ 背景图片已设置:', imageUrl, styles);
+        }
+        
+        /**
+         * 移除背景图片
+         */
+        function removeBackgroundImage() {
+            const bgContainer = document.getElementById('backgroundContainer');
+            if (bgContainer) {
+                bgContainer.innerHTML = '';
+                console.log('✅ 背景图片已移除');
             }
         }
         
-        // 更新状态信息
-        function updateStatus(message) {
-            statusInfo.textContent = message;
-            console.log(message);
+        /**
+         * 更新背景图片样式
+         * @param {Object} styles - 要更新的样式对象
+         */
+        function updateBackgroundStyles(styles = {}) {
+            const bgContainer = document.getElementById('backgroundContainer');
+            if (!bgContainer) return;
+            
+            const bgImg = bgContainer.querySelector('img');
+            if (!bgImg) {
+                console.warn('没有背景图片可更新');
+                return;
+            }
+            
+            // 更新样式
+            Object.keys(styles).forEach(styleKey => {
+                if (styles[styleKey] !== undefined) {
+                    bgImg.style[styleKey] = styles[styleKey];
+                }
+            });
+            
+            console.log('✅ 背景图片样式已更新:', styles);
         }
         
-        // 压缩图片函数
-        function compressImage(file, callback) {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            
-            reader.onload = function(event) {
-                const img = new Image();
-                img.src = event.target.result;
+        // ===== 示例：在后台通过代码行设置背景图片 =====
+        // 取消注释并修改以下代码来设置背景图片
+        
+        /*
+        // 示例1：设置全屏覆盖的背景图片
+        setBackgroundImage('your-background-image.jpg', {
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            objectPosition: 'center',
+            opacity: '0.7'
+        });
+        
+        // 示例2：更新背景图片样式
+        updateBackgroundStyles({
+            opacity: '0.5',
+            filter: 'blur(2px)'
+        });
+        
+        // 示例3：移除背景图片
+        // removeBackgroundImage();
+        */
+        
+        // ===== 重构后的TeleprompterScroller类（移除所有进度功能） =====
+        class TeleprompterScroller {
+            constructor(wrapper, options = {}) {
+                this.wrapper = wrapper;
+                this.inner = wrapper.querySelector('.teleprompter-inner');
+                this.mainImage = wrapper.querySelector('.teleprompter-img');
                 
-                img.onload = function() {
-                    const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
-                    
-                    // 计算压缩比例
-                    let width = img.width;
-                    let height = img.height;
-                    const maxDimension = 1920; // 最大尺寸
-                    
-                    if (width > height && width > maxDimension) {
-                        height = (height * maxDimension) / width;
-                        width = maxDimension;
-                    } else if (height > maxDimension) {
-                        width = (width * maxDimension) / height;
-                        height = maxDimension;
+                // 配置参数
+                this.options = {
+                    scrollSpeed: 1.5,
+                    autoPlay: false,
+                    maxQueueLength: 10,
+                    ...options
+                };
+                
+                // 状态变量
+                this.isPlaying = this.options.autoPlay;
+                this.hasStarted = false;
+                this.isUserScrolling = false;
+                this.scrollAnimationId = null;
+                
+                // 图片队列（新增）
+                this.imageQueue = [];
+                this.currentImageIndex = 0;
+                
+                // 尺寸信息
+                this.imageHeight = 0;
+                this.containerHeight = 0;
+                this.totalScrollableHeight = 0; // 总可滚动距离
+                
+                // 初始化
+                this.init();
+            }
+            
+            async init() {
+                console.log('🚀 TeleprompterScroller初始化（无进度条版）');
+                
+                // 等待主图片加载
+                await this.waitForImageLoad(this.mainImage);
+                
+                // 初始化图片队列
+                this.initializeImageQueue();
+                
+                // 计算尺寸
+                this.calculateDimensions();
+                
+                // 添加底部占位 - 关键修改：允许图片完全滚出
+                this.addBottomSpacer();
+                
+                // 绑定事件
+                this.bindEvents();
+                
+                // 显示容器
+                this.wrapper.classList.remove('loading');
+                this.wrapper.classList.add('loaded');
+                
+                console.log('✅ TeleprompterScroller初始化完成', {
+                    当前图片高度: `${this.imageHeight}px`,
+                    容器高度: `${this.containerHeight}px`,
+                    可滚动总距离: `${this.totalScrollableHeight}px`,
+                    队列长度: this.imageQueue.length
+                });
+            }
+            
+            // 添加底部占位元素
+            addBottomSpacer() {
+                // 创建占位元素，高度等于容器高度
+                const spacer = document.createElement('div');
+                spacer.className = 'bottom-spacer';
+                spacer.style.height = this.containerHeight + 'px';
+                spacer.style.width = '100%';
+                spacer.style.background = 'transparent';
+                spacer.style.pointerEvents = 'none';
+                spacer.style.flexShrink = '0';
+                
+                // 插入到图片后面
+                if (this.mainImage && this.mainImage.parentNode) {
+                    this.mainImage.parentNode.appendChild(spacer);
+                    console.log(`📐 添加底部占位: ${this.containerHeight}px`);
+                }
+            }
+            
+            // 简化的图片加载等待
+            waitForImageLoad(img) {
+                return new Promise((resolve) => {
+                    if (img.complete && img.naturalHeight > 100) {
+                        console.log(`📸 图片已加载: ${img.naturalHeight}px`);
+                        setTimeout(resolve, 50);
+                    } else {
+                        img.onload = () => {
+                            console.log(`📸 图片加载完成: ${img.naturalHeight}px`);
+                            setTimeout(resolve, 50);
+                        };
+                        img.onerror = () => {
+                            console.warn('图片加载失败，使用默认高度');
+                            setTimeout(resolve, 50);
+                        };
                     }
                     
-                    canvas.width = width;
-                    canvas.height = height;
-                    
-                    ctx.drawImage(img, 0, 0, width, height);
-                    
-                    canvas.toBlob(function(blob) {
-                        callback(blob);
-                    }, file.type, 0.7); // 质量0.7
-                };
-            };
+                    setTimeout(resolve, 3000);
+                });
+            }
             
-            reader.onerror = function() {
-                updateStatus('图片读取失败');
-                callback(null);
-            };
-        }
-        
-        // 计算内容总高度
-        function calculateHeights() {
-            // === 修改：content-container现在是500px的96% = 约480px ===
-            containerHeight = contentContainer.clientHeight;
-            totalContentHeight = 0;
+            // 初始化图片队列（从现有图片开始）
+            initializeImageQueue() {
+                if (this.mainImage && this.mainImage.src) {
+                    this.imageQueue.push({
+                        element: this.mainImage,
+                        src: this.mainImage.src,
+                        height: this.mainImage.naturalHeight || this.mainImage.clientHeight
+                    });
+                    console.log('📋 初始化图片队列，添加第一张图片');
+                }
+            }
             
-            // 计算所有图片的总高度（包括间距）
-            if (images.length > 0) {
-                images.forEach((imgData, index) => {
-                    if (imgData.element) {
-                        totalContentHeight += imgData.height + 20; // 20px为图片间距
+            // 尺寸计算
+            calculateDimensions() {
+                // 使用主图片高度
+                const img = this.mainImage;
+                this.imageHeight = img.naturalHeight > 100 ? 
+                    img.naturalHeight : img.clientHeight;
+                
+                // 容器高度
+                this.containerHeight = this.wrapper.clientHeight;
+                
+                // 总可滚动距离 = 图片高度 + 容器高度（用于完全滚出）
+                this.totalScrollableHeight = this.imageHeight + this.containerHeight;
+                
+                console.log('📏 尺寸计算:', {
+                    图片高度: this.imageHeight,
+                    容器高度: this.containerHeight,
+                    可滚动总距离: this.totalScrollableHeight,
+                    说明: '图片完全滚出需要的滚动距离'
+                });
+            }
+            
+            // 滚动动画 - 图片完全滚出时停止
+            animateScroll() {
+                if (this.isPlaying) {
+                    // 向上滚动
+                    let scrollTop = this.wrapper.scrollTop;
+                    
+                    // 最大滚动距离 = 图片高度 + 容器高度
+                    const maxScroll = this.totalScrollableHeight;
+                    
+                    // 如果还没滚动到图片完全消失，继续滚动
+                    if (scrollTop < maxScroll) {
+                        scrollTop += this.options.scrollSpeed;
+                        this.wrapper.scrollTop = scrollTop;
+                        
+                        // 继续动画
+                        this.scrollAnimationId = requestAnimationFrame(() => this.animateScroll());
+                    } else {
+                        // 滚动到图片完全消失，暂停
+                        console.log('🏁 图片完全滚出视野，自动暂停');
+                        this.pause();
+                        
+                        // 更新按钮状态
+                        const playBtn = document.getElementById('scrollToggleBtn');
+                        if (playBtn) {
+                            playBtn.classList.remove('active');
+                            playBtn.innerHTML = '▶';
+                        }
+                    }
+                }
+            }
+            
+            // ===== 图片队列管理方法 =====
+            
+            // 添加新图片到队列顶部
+            async addImageToQueue(imageFile) {
+                console.log('🖼️ 开始添加新图片到队列...');
+                
+                // 创建临时加载提示
+                this.showLoadingIndicator();
+                
+                try {
+                    // 1. 创建新的图片元素
+                    const newImage = document.createElement('img');
+                    newImage.className = 'teleprompter-img new-image';
+                    newImage.alt = '新导入图片';
+                    
+                    // 2. 读取文件为DataURL
+                    const dataUrl = await this.readFileAsDataURL(imageFile);
+                    
+                    // 3. 等待图片加载完成
+                    await new Promise((resolve, reject) => {
+                        newImage.onload = () => {
+                            console.log(`✅ 新图片加载成功: ${newImage.naturalWidth}x${newImage.naturalHeight}`);
+                            resolve();
+                        };
+                        newImage.onerror = () => {
+                            console.error('❌ 新图片加载失败');
+                            reject(new Error('图片加载失败'));
+                        };
+                        newImage.src = dataUrl;
+                    });
+                    
+                    // 4. 插入到队列顶部（DOM操作）
+                    this.insertImageAtTop(newImage, dataUrl);
+                    
+                    // 5. 更新尺寸和滚动位置
+                    this.updateAfterImageAdded(newImage);
+                    
+                    // 6. 如果正在播放，继续播放
+                    if (this.isPlaying) {
+                        this.animateScroll();
+                    }
+                    
+                    // 7. 隐藏加载提示
+                    this.hideLoadingIndicator();
+                    
+                    console.log('🎉 新图片成功添加到队列顶部');
+                    return true;
+                    
+                } catch (error) {
+                    console.error('添加图片失败:', error);
+                    this.hideLoadingIndicator();
+                    this.showError('图片添加失败: ' + error.message);
+                    return false;
+                }
+            }
+            
+            // 读取文件为DataURL
+            readFileAsDataURL(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => resolve(e.target.result);
+                    reader.onerror = () => reject(new Error('文件读取失败'));
+                    reader.readAsDataURL(file);
+                });
+            }
+            
+            // 将图片插入到DOM顶部
+            insertImageAtTop(newImage, dataUrl) {
+                // 创建图片包装器
+                const imageWrapper = document.createElement('div');
+                imageWrapper.className = 'image-item';
+                imageWrapper.style.position = 'relative';
+                imageWrapper.style.marginBottom = '0px';
+                
+                // 添加图片
+                imageWrapper.appendChild(newImage);
+                
+                // 添加到队列数组
+                this.imageQueue.unshift({
+                    element: newImage,
+                    src: dataUrl,
+                    height: newImage.naturalHeight,
+                    wrapper: imageWrapper
+                });
+                
+                // 限制队列长度
+                if (this.imageQueue.length > this.options.maxQueueLength) {
+                    this.removeOldestImage();
+                }
+                
+                // 插入到DOM
+                this.inner.insertBefore(imageWrapper, this.inner.firstChild);
+                
+                console.log(`📊 队列更新: 当前 ${this.imageQueue.length} 张图片`);
+            }
+            
+            // 移除最旧的图片
+            removeOldestImage() {
+                if (this.imageQueue.length <= 1) return;
+                
+                const oldest = this.imageQueue.pop();
+                if (oldest.wrapper && oldest.wrapper.parentNode) {
+                    oldest.wrapper.parentNode.removeChild(oldest.wrapper);
+                    console.log('🗑️ 移除最旧的图片');
+                }
+            }
+            
+            // 添加图片后更新
+            updateAfterImageAdded(newImage) {
+                // 更新当前图片引用
+                this.mainImage = newImage;
+                
+                // 重新计算尺寸
+                this.calculateDimensions();
+                
+                // 添加新的底部占位
+                this.addBottomSpacer();
+                
+                // 重置滚动位置到顶部（显示新图片）
+                this.wrapper.scrollTop = 0;
+            }
+            
+            // 显示加载指示器
+            showLoadingIndicator() {
+                let loader = this.wrapper.querySelector('.image-loading');
+                if (!loader) {
+                    loader = document.createElement('div');
+                    loader.className = 'image-loading';
+                    loader.innerHTML = '🔄 加载中...';
+                    loader.style.cssText = `
+                        position: absolute;
+                        top: 20px;
+                        left: 50%;
+                        transform: translateX(-50%);
+                        background: rgba(0,0,0,0.8);
+                        color: #ffd700;
+                        padding: 10px 20px;
+                        border-radius: 5px;
+                        z-index: 100;
+                    `;
+                    this.wrapper.appendChild(loader);
+                }
+            }
+            
+            // 隐藏加载指示器
+            hideLoadingIndicator() {
+                const loader = this.wrapper.querySelector('.image-loading');
+                if (loader) {
+                    loader.remove();
+                }
+            }
+            
+            // 显示错误提示
+            showError(message) {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'image-error';
+                errorDiv.innerHTML = `❌ ${message}`;
+                errorDiv.style.cssText = `
+                    position: absolute;
+                    top: 20px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    background: rgba(255,0,0,0.8);
+                    color: white;
+                    padding: 10px 20px;
+                    border-radius: 5px;
+                    z-index: 100;
+                `;
+                
+                this.wrapper.appendChild(errorDiv);
+                setTimeout(() => errorDiv.remove(), 3000);
+            }
+            
+            // ===== 事件绑定（移除进度条相关事件） =====
+            bindEvents() {
+                // 保持原有的事件绑定逻辑
+                this.wrapper.addEventListener('click', (e) => {
+                    if (this.isUserScrolling) {
+                        this.isUserScrolling = false;
+                        this.togglePlay();
+                    } else {
+                        this.togglePlay();
                     }
                 });
                 
-                // 减去最后一个图片的额外间距
-                totalContentHeight -= 20;
-                
-                // 确保总高度足够让所有图片完全滚出屏幕
-                totalContentHeight += containerHeight;
-            }
-            
-            console.log('容器高度:', containerHeight, '内容总高度:', totalContentHeight, '图片数量:', images.length);
-            updateImageCounter();
-            updatePosition();
-        }
-        
-        // 更新位置
-        function updatePosition() {
-            const maxPosition = totalContentHeight;
-            position = Math.max(0, Math.min(position, maxPosition));
-            
-            if (useTopPositioning) {
-                imageContainer.style.setProperty('--content-position', `-${position}px`);
-            } else {
-                imageContainer.style.setProperty('--scroll-position', `-${position}px`);
-            }
-            
-            // 检查是否滚动结束 - 当所有图片完全滚出屏幕顶部
-            if (position >= maxPosition && isPlaying && images.length > 0) {
-                pauseScrolling();
-                updateStatus('滚动完成 - 所有图片已完全滚出');
-            }
-        }
-        
-        // 创建图片元素并获取高度
-        function createImageElement(blob, filename) {
-            return new Promise((resolve) => {
-                const url = URL.createObjectURL(blob);
-                const img = new Image();
-                
-                img.onload = function() {
-                    const imgElement = document.createElement('img');
-                    imgElement.className = 'image-item';
-                    imgElement.src = url;
-                    imgElement.alt = filename;
+                // 监听用户手动滚动
+                let scrollTimeout;
+                this.wrapper.addEventListener('scroll', () => {
+                    // 清除之前的超时
+                    if (scrollTimeout) clearTimeout(scrollTimeout);
                     
-                    // 设置最大宽度为容器宽度
-                    imgElement.style.maxWidth = '100%';
-                    imgElement.style.height = 'auto';
-                    
-                    // 计算实际显示高度
-                    const containerWidth = contentContainer.clientWidth - 30; // 减去一些padding
-                    let displayWidth = img.width;
-                    let displayHeight = img.height;
-                    
-                    if (displayWidth > containerWidth) {
-                        const ratio = containerWidth / displayWidth;
-                        displayWidth = containerWidth;
-                        displayHeight = displayHeight * ratio;
+                    // 如果正在自动滚动，用户开始手动滚动时暂停
+                    if (this.isPlaying && !this.isUserScrolling) {
+                        this.isUserScrolling = true;
+                        console.log('⏸️ 用户手动滚动，暂停自动滚动');
+                        this.pause();
                     }
                     
-                    const imageData = {
-                        element: imgElement,
-                        height: displayHeight,
-                        width: displayWidth,
-                        url: url,
-                        filename: filename
+                    // 设置超时，检测滚动是否停止
+                    scrollTimeout = setTimeout(() => {
+                        if (this.isUserScrolling) {
+                            console.log('🔄 用户滚动停止');
+                        }
+                    }, 100);
+                });
+                
+                // 监听触摸开始
+                this.wrapper.addEventListener('touchstart', (e) => {
+                    if (this.isPlaying && !this.isUserScrolling) {
+                        this.isUserScrolling = true;
+                        this.pause();
+                    }
+                });
+            }
+            
+            togglePlay() {
+                if (!this.hasStarted) {
+                    this.hasStarted = true;
+                    this.isPlaying = true;
+                    console.log('▶️ 开始自动滚动');
+                    this.animateScroll();
+                } else {
+                    this.isPlaying = !this.isPlaying;
+                    console.log(this.isPlaying ? '▶️ 恢复播放' : '⏸️ 暂停播放');
+                    
+                    if (this.isPlaying) {
+                        this.animateScroll();
+                    } else {
+                        cancelAnimationFrame(this.scrollAnimationId);
+                    }
+                }
+            }
+            
+            play() { 
+                if (!this.hasStarted) this.hasStarted = true;
+                this.isPlaying = true; 
+                this.animateScroll();
+            }
+            
+            pause() { 
+                this.isPlaying = false; 
+                cancelAnimationFrame(this.scrollAnimationId);
+            }
+            
+            // 调试方法
+            enableDebug() {
+                this.debugMode = true;
+                console.log('🔧 调试模式已启用');
+            }
+            
+            getStatus() {
+                return {
+                    isPlaying: this.isPlaying,
+                    hasStarted: this.hasStarted,
+                    isUserScrolling: this.isUserScrolling,
+                    scrollTop: this.wrapper.scrollTop,
+                    imageHeight: this.imageHeight,
+                    containerHeight: this.containerHeight,
+                    totalScrollableHeight: this.totalScrollableHeight,
+                    queueLength: this.imageQueue.length
+                };
+            }
+        }
+        
+        // ===== 原有的页面交互功能（完全不变） =====
+        document.querySelector('.year-3d').addEventListener('mousemove', function(e) {
+            const xAxis = (window.innerWidth / 2 - e.pageX) / 25;
+            const yAxis = (window.innerHeight / 2 - e.pageY) / 25;
+            
+            this.style.transform = `rotateX(${15 + yAxis}deg) rotateY(${xAxis}deg)`;
+        });
+        
+        document.querySelector('.year-3d').addEventListener('click', function() {
+            this.style.animation = 'none';
+            this.style.transform = 'rotateX(20deg) rotateY(20deg) scale(1.1)';
+            
+            setTimeout(() => {
+                this.style.animation = 'float 6s ease-in-out infinite';
+            }, 500);
+        });
+        
+        // ===== 初始化页面 =====
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('='.repeat(60));
+            console.log('🚀 页面加载完成，开始初始化...');
+            console.log('='.repeat(60));
+            
+            // 数字逐个出现效果
+            const digits = document.querySelectorAll('.year-3d span');
+            digits.forEach((digit, index) => {
+                digit.style.opacity = '0';
+                digit.style.transform = 'translateY(50px)';
+                
+                setTimeout(() => {
+                    digit.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+                    digit.style.opacity = '1';
+                    digit.style.transform = 'translateY(0)';
+                }, index * 200);
+            });
+            
+            // logo图片加载动画
+            const logoImg = document.querySelector('.logo img');
+            if (logoImg) {
+                logoImg.style.opacity = '0';
+                logoImg.style.transform = 'translateY(30px)';
+                
+                setTimeout(() => {
+                    logoImg.style.transition = 'opacity 1s ease, transform 1s ease';
+                    logoImg.style.opacity = '1';
+                    logoImg.style.transform = 'translateY(0)';
+                }, 1000);
+            }
+            
+            // 初始化媒体播放器
+            updateProgress();
+            
+            // 延迟初始化teleprompter滚动器和按钮
+            setTimeout(() => {
+                console.log('\n📊 初始化TeleprompterScroller和功能按钮...');
+                const teleprompterWrapper = document.querySelector('.teleprompter-wrapper');
+                
+                if (teleprompterWrapper) {
+                    // 创建支持动态队列的滚动器
+                    const scroller = new TeleprompterScroller(teleprompterWrapper, {
+                        scrollSpeed: 1.5,
+                        autoPlay: false,
+                        maxQueueLength: 10
+                    });
+                    
+                    // ===== 按钮控制逻辑 =====
+                    const scrollToggleBtn = document.getElementById('scrollToggleBtn');
+                    const importImageBtn = document.getElementById('importImageBtn');
+                    const uploadInput = document.getElementById('imageUploadInput');
+                    
+                    // 播放/暂停按钮
+                    if (scrollToggleBtn) {
+                        scrollToggleBtn.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            scroller.togglePlay();
+                            this.classList.toggle('active', scroller.isPlaying);
+                            this.innerHTML = scroller.isPlaying ? '⏸' : '▶';
+                        });
+                    }
+                    
+                    // 导入图片按钮
+                    if (importImageBtn && uploadInput) {
+                        importImageBtn.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            uploadInput.click();
+                        });
+                        
+                        // 文件选择变化事件
+                        uploadInput.addEventListener('change', function(e) {
+                            const file = e.target.files[0];
+                            if (!file) return;
+                            
+                            // 验证文件类型
+                            if (!file.type.match('image.*')) {
+                                alert('请选择图片文件！');
+                                return;
+                            }
+                            
+                            // 验证文件大小（限制5MB）
+                            if (file.size > 5 * 1024 * 1024) {
+                                alert('图片大小不能超过5MB！');
+                                return;
+                            }
+                            
+                            console.log('📁 选择的图片:', file.name, file.type, (file.size/1024).toFixed(1) + 'KB');
+                            
+                            // 添加到滚动队列
+                            scroller.addImageToQueue(file)
+                                .then(success => {
+                                    if (success) {
+                                        // 自动开始播放
+                                        if (!scroller.isPlaying) {
+                                            scroller.play();
+                                            if (scrollToggleBtn) {
+                                                scrollToggleBtn.classList.add('active');
+                                                scrollToggleBtn.innerHTML = '⏸';
+                                            }
+                                        }
+                                    }
+                                });
+                            
+                            // 清空input，允许重复选择同一文件
+                            uploadInput.value = '';
+                        });
+                    }
+                    
+                    // 保存到全局，方便调试
+                    window.teleprompterScroller = scroller;
+                    
+                    // 添加背景图片管理函数到全局
+                    window.backgroundManager = {
+                        setBackgroundImage,
+                        removeBackgroundImage,
+                        updateBackgroundStyles
                     };
                     
-                    resolve(imageData);
-                };
-                
-                img.onerror = function() {
-                    updateStatus(`图片 ${filename} 加载失败`);
-                    resolve(null);
-                };
-                
-                img.src = url;
-            });
-        }
-        
-        // 添加图片到容器（插入到最前面）
-        function addImageToContainer(imageData, insertAtFront = true) {
-            // 检查是否达到上限
-            if (images.length >= MAX_IMAGES) {
-                // 移除最早的一张图片（最后一张）
-                const removedImage = images.pop();
-                if (removedImage && removedImage.element) {
-                    // 从DOM中移除
-                    if (removedImage.element.parentNode) {
-                        removedImage.element.parentNode.removeChild(removedImage.element);
-                    }
-                    // 释放blob URL
-                    if (removedImage.url) {
-                        URL.revokeObjectURL(removedImage.url);
-                    }
-                    updateStatus('已达到50张限制，已移除最早的一张图片');
-                }
-            }
-            
-            // 添加到数组
-            if (insertAtFront) {
-                // 插入到最前面
-                images.unshift(imageData);
-                // 插入到DOM最前面
-                if (imageContainer.firstChild) {
-                    imageContainer.insertBefore(imageData.element, imageContainer.firstChild);
-                } else {
-                    imageContainer.appendChild(imageData.element);
-                }
-            } else {
-                // 添加到后面（备用）
-                images.push(imageData);
-                imageContainer.appendChild(imageData.element);
-            }
-        }
-        
-        // 处理图片导入
-        async function handleImageUpload(files) {
-            if (files.length === 0) return;
-            
-            updateStatus(`正在处理 ${files.length} 张图片...`);
-            
-            const newImages = [];
-            
-            for (let i = 0; i < files.length; i++) {
-                const file = files[i];
-                
-                // 检查文件类型
-                if (!file.type.match('image.*')) {
-                    updateStatus(`文件 ${file.name} 不是图片格式`);
-                    continue;
-                }
-                
-                // 检查文件大小
-                if (file.size > MAX_FILE_SIZE) {
-                    updateStatus(`压缩图片: ${file.name} (${(file.size/1024/1024).toFixed(2)}MB)`);
-                    await new Promise(resolve => {
-                        compressImage(file, async function(compressedBlob) {
-                            if (compressedBlob) {
-                                const imageData = await createImageElement(compressedBlob, file.name);
-                                if (imageData) {
-                                    newImages.push(imageData);
-                                }
+                    // 添加调试命令
+                    window.debugScroller = function() {
+                        console.group('🔍 TeleprompterScroller 状态');
+                        const status = scroller.getStatus();
+                        console.table(status);
+                        console.groupEnd();
+                        return status;
+                    };
+                    
+                    // 添加控制命令
+                    window.scrollerControls = {
+                        play: () => {
+                            scroller.play();
+                            if (scrollToggleBtn) {
+                                scrollToggleBtn.classList.add('active');
+                                scrollToggleBtn.innerHTML = '⏸';
                             }
-                            resolve();
-                        });
-                    });
-                } else {
-                    const imageData = await createImageElement(file, file.name);
-                    if (imageData) {
-                        newImages.push(imageData);
-                    }
-                }
-            }
-            
-            // 将所有新图片插入到最前面（保持上传顺序）
-            for (let i = newImages.length - 1; i >= 0; i--) {
-                addImageToContainer(newImages[i], true);
-            }
-            
-            // 重置滚动位置到顶部（因为新图片加在最前面）
-            position = 0;
-            
-            // 计算高度
-            setTimeout(() => {
-                calculateHeights();
-                updateStatus(`已导入 ${newImages.length} 张图片，当前共 ${images.length} 张`);
-            }, 500);
-        }
-        
-        // 更新速度显示
-        speedSlider.addEventListener('input', function() {
-            speed = parseInt(this.value);
-            speedValue.textContent = speed;
-        });
-        
-        // 开始滚动
-        function startScrolling() {
-            if (!isPlaying && images.length > 0) {
-                isPlaying = true;
-                startBtn.disabled = true;
-                pauseBtn.disabled = false;
-                calculateHeights();
-                animate();
-                updateStatus('滚动中...');
-            } else if (images.length === 0) {
-                updateStatus('请先导入图片');
-            }
-        }
-        
-        // 暂停滚动
-        function pauseScrolling() {
-            if (isPlaying) {
-                isPlaying = false;
-                startBtn.disabled = false;
-                pauseBtn.disabled = true;
-                cancelAnimationFrame(animationId);
-                updateStatus('已暂停');
-            }
-        }
-        
-        startBtn.addEventListener('click', startScrolling);
-        pauseBtn.addEventListener('click', pauseScrolling);
-        
-        // 重置位置
-        resetBtn.addEventListener('click', function() {
-            pauseScrolling();
-            position = 0;
-            updatePosition();
-            updateStatus('已重置到顶部');
-        });
-        
-        // 打开文件对话框
-        openFileBtn.addEventListener('click', function() {
-            fileInput.click();
-        });
-        
-        // 处理文件选择
-        fileInput.addEventListener('change', async function(e) {
-            const files = Array.from(e.target.files);
-            if (files.length === 0) return;
-            
-            await handleImageUpload(files);
-            fileInput.value = ''; // 重置input
-        });
-        
-        // 动画函数
-        function animate() {
-            position += speed / 10;
-            updatePosition();
-            
-            if (isPlaying) {
-                animationId = requestAnimationFrame(animate);
-            }
-        }
-        
-        // 触摸事件处理
-        teleprompterArea.addEventListener('touchstart', function(e) {
-            if (isPlaying) pauseScrolling();
-            
-            touchStartY = e.touches[0].clientY;
-            touchStartPosition = position;
-            isTouchMoving = true;
-            e.preventDefault();
-        }, { passive: false });
-        
-        teleprompterArea.addEventListener('touchmove', function(e) {
-            if (!isTouchMoving) return;
-            
-            const touchY = e.touches[0].clientY;
-            const deltaY = touchY - touchStartY;
-            position = touchStartPosition - deltaY;
-            
-            updatePosition();
-            e.preventDefault();
-        }, { passive: false });
-        
-        teleprompterArea.addEventListener('touchend', function(e) {
-            isTouchMoving = false;
-            e.preventDefault();
-        }, { passive: false });
-        
-        // 窗口调整
-        window.addEventListener('resize', function() {
-            // 重新计算所有图片的高度
-            setTimeout(() => {
-                if (images.length > 0) {
-                    images.forEach(imgData => {
-                        if (imgData.element) {
-                            const containerWidth = contentContainer.clientWidth - 30;
-                            let displayWidth = imgData.width;
-                            let displayHeight = imgData.height;
-                            
-                            if (displayWidth > containerWidth) {
-                                const ratio = containerWidth / displayWidth;
-                                displayWidth = containerWidth;
-                                displayHeight = displayHeight * ratio;
+                        },
+                        pause: () => {
+                            scroller.pause();
+                            if (scrollToggleBtn) {
+                                scrollToggleBtn.classList.remove('active');
+                                scrollToggleBtn.innerHTML = '▶';
                             }
-                            
-                            imgData.height = displayHeight;
-                            imgData.width = displayWidth;
-                        }
-                    });
-                    calculateHeights();
+                        },
+                        toggle: () => {
+                            scroller.togglePlay();
+                            if (scrollToggleBtn) {
+                                scrollToggleBtn.classList.toggle('active', scroller.isPlaying);
+                                scrollToggleBtn.innerHTML = scroller.isPlaying ? '⏸' : '▶';
+                            }
+                        },
+                        addImage: (file) => scroller.addImageToQueue(file),
+                        getStatus: () => scroller.getStatus(),
+                        enableDebug: () => scroller.enableDebug()
+                    };
+                    
+                    console.log('\n🎮 可用调试命令:');
+                    console.log('   debugScroller()            - 查看滚动器状态');
+                    console.log('   scrollerControls.play()    - 开始滚动');
+                    console.log('   scrollerControls.pause()   - 暂停滚动');
+                    console.log('   scrollerControls.toggle()  - 切换播放状态');
+                    console.log('   scrollerControls.addImage(file) - 添加图片');
+                    
+                    console.log('\n🎨 背景图片管理命令:');
+                    console.log('   backgroundManager.setBackgroundImage(url, styles) - 设置背景');
+                    console.log('   backgroundManager.removeBackgroundImage() - 移除背景');
+                    console.log('   backgroundManager.updateBackgroundStyles(styles) - 更新样式');
+                    
+                    console.log('\n💡 用户交互提示:');
+                    console.log('   1. 点击▶/⏸按钮控制滚动播放/暂停');
+                    console.log('   2. 点击📤按钮导入新图片到队列顶部');
+                    console.log('   3. 可以用手指/鼠标直接拖拽滚动图片');
+                    console.log('   4. 拖拽滚动时会暂停自动滚动，需要再次点击恢复');
+                    console.log('   5. 最多保留10张图片，旧的会自动移除');
+                    console.log('   6. 图片从顶部开始，完全滚出容器时自动停止');
+                    console.log('   7. 进度条功能已移除');
+                    console.log('   8. 背景容器已添加，可通过代码行设置背景');
+                    
+                    console.log('\n✅ TeleprompterScroller初始化完成');
+                    console.log('🔄 滚动逻辑：图片从顶部开始，完全滚出容器时自动停止');
+                    
+                } else {
+                    console.error('❌ 找不到teleprompter-wrapper元素');
                 }
-            }, 100);
+            }, 2000);
         });
-        
-        window.addEventListener('orientationchange', function() {
-            setTimeout(() => {
-                calculateHeights();
-                updatePosition();
-            }, 300);
-        });
-        
-        // === 初始化函数 ===
-        function init() {
-            updateStatus('准备就绪 - 请导入图片');
-            updateImageCounter();
-            contentContainer.style.height = '96%'; // 500px的96% = 约480px
-            
-            // === 背景图片设置示例（后台调用）===
-            // 示例1：设置背景图片，位置偏移 (50px, 100px)
-            // setBackgroundImage('https://example.com/background.jpg', 50, 100);
-            setBackgroundImage('cmgapmap.jpg', -80, 0)
-            // 示例2：设置背景图片，无偏移 (0px, 0px)
-            // setBackgroundImage('https://example.com/background2.jpg', 0, 0);
-            
-            // 示例3：保持黑色背景（默认）
-            // clearBackgroundImage(); // 或者不调用任何函数
-            
-            console.log('提词器初始化完成，容器高度：500px');
-        }
-        
-        // 清理URL对象
-        window.addEventListener('beforeunload', function() {
-            if (animationId) {
-                cancelAnimationFrame(animationId);
-            }
-            // 清理所有blob URL
-            images.forEach(imgData => {
-                if (imgData.url) {
-                    URL.revokeObjectURL(imgData.url);
-                }
-            });
-        });
-        
-        window.addEventListener('load', init);
-        
-        // === 导出背景设置函数，供后台调用 ===
-        window.CMG_Teleprompter = {
-            setBackgroundImage: setBackgroundImage,
-            clearBackgroundImage: clearBackgroundImage,
-            getImageCount: () => images.length,
-            getScrollPosition: () => position,
-            isPlaying: () => isPlaying
-        };
-        
-        console.log('CMG 图片提词器已加载，背景设置函数已导出到 window.CMG_Teleprompter');
     </script>
 </body>
 </html>
